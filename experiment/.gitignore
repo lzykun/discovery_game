@@ -1,0 +1,31 @@
+# Standard places to put a virtual environment
+env/
+.venv/
+
+# Automatically generated deployment resources, e.g. database templates
+.deploy/
+
+# Automatically generated server log file
+server.log
+
+# Automatically generated resources for running experiments with assets
+static/assets
+
+# Experiment source code snapshot created in `Experiment.pre_deploy`
+source_code.zip
+
+# IDE and cache files
+.idea
+__pycache__
+*.pyc
+*.DS_Store
+
+# PsyNet/Dallinger runtime outputs
+data/
+*.sqlite
+*.log
+dump.rdb
+
+# JavaScript test dependencies and transient Playwright output
+node_modules/
+test-results/

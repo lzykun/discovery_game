@@ -1,0 +1,14 @@
+[Config]
+title = Discovery chain crystal game (local demo)
+description = A local PsyNet demonstration of an aggregated transmission-chain crystal discovery game. Please use a Chrome browser. This local challenge attempt uses only simulated or local participants.
+contact_email_on_error = noreply@example.com
+organization_name = PsyNetSkills
+
+recruiter = generic
+currency = $
+wage_per_hour = 12.0
+base_payment = 0.00
+show_reward = false
+
+[Prolific]
+auto_recruit = false

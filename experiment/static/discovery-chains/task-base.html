@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+
+
+
+  <head>
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"> -->
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <title>Experiment</title>
+  </head>
+
+
+  <body>
+
+    <div id="welcome" class="base" >
+        
+<div style="text-align: right; padding: 0.5em 1em; font-size: 1em;">
+    <a href="accessibility.html">Accessibility</a>
+</div>
+
+
+
+      <h1>Information for participants</h1>
+      <div id="consent-info"></div>
+      <div class="button-group-vc">
+        <button class="big-button" id="consent-btn" onclick="hideAndShowNext('welcome','prolific_id','block')">I agree</button>
+      </div>
+    </div>
+
+
+
+    <div id="prolific_id" class="base" style="display:none;">
+      <h1>Enter your Prolific ID to continue:</h1>
+      <textarea name="prolific_id_text" id="prolific_id_text" placeholder="" style="width:90%;margin-left:25px;font-size:20px;"></textarea>
+      <div class='button-group-vc'>
+        <button class='big-button' id='prolific_id-btn' onclick="handle_prolific()">Confirm</button>
+      </div>
+    </div>
+
+
+
+    <div id="instruction" class="long-base" style="display:none;">
+      <h1>Instructions</h1>
+
+      <div id="instruction-1">
+        <div id="instruction-1-content" style="padding-left:5px">
+
+          <p>
+            Welcome, and thank you for participating in our study! Please read the instructions carefully.
+          </p>
+
+
+          <h2 class="instruct-heading">Objective</h2>
+
+          <p>
+            <b>In this game, you are a space explorer.</b>
+            You have discovered a faraway planet with a curious property &mdash;
+            the surface of the planet is dotted with valuable crystals that can be <b>harvested</b> for energy points.
+            Some of these crystals can also be <b>fused to make new</b> and much more powerful crystals;
+            however, scientists still do not understand why some pairs of crystals can fuse while others cannot.
+          </p>
+
+          <p>
+            Your goal is to <b>harvest the most energy points possible</b>
+            by collecting, combining, and harvesting crystals.
+            Explore the planet to discover new, more rewarding crystals and maximize your score.
+          </p>
+
+            <img src="../img/_demo.png" height="300" style="margin-left: 20px;"><br>
+
+
+          <h2 class="instruct-heading">How to play:</h2>
+          <ol>
+            <li><b>Move your space rover</b>: Use the <b>arrow keys</b> to move around the planet.<br>
+              <img src="../img/_keys.gif" height="50" style="margin-left: 20px;"></li>
+
+            <li>
+              <b>To pick up a crystal</b>: Stand on top of a crystal and press the <b>spacebar</b>.
+              You must have your rover's stock empty to pick something up!
+            </li>
+
+            <li>
+              <b>To fuse crystals</b>: Stand on top of a crystal while holding another crystal in your stock and press the <b>spacebar</b>.
+              Not all crystals can be fused&mdash;but, if you do discover a successful fusion,
+              it will make a new crystal that is worth 10 times more energy points.
+            </li>
+
+            <li>
+              <b>To harvest a crystal</b>: Press the <b>spacebar</b> while you are holding a crystal in the hover and standing on an empty spot.
+              Harvesting crystals is the only way to earn energy points.
+            </li>
+
+            <li>
+              <b>To drop a crystal</b>: Press the <b>D key</b> to drop the crystal you are holding&mdash;this will free up your space hover.
+            </li>
+
+          </ol>
+
+
+          <h2 class="instruct-heading">Fusion guide:</h2>
+          <ul>
+
+            <li>On this planet, naturally-occurring crystals are <b>red</b>. Each red crystal is worth 1 energy point, and they can regenerate once. </li>
+
+            <li>Each crystal's color shows how many energy points it's worth:
+              <ul>
+                <li>&#x1F7E5; 1 point</li> <!-- Red Square -->
+                <li>&#x1F7E7; 10 points</li> <!-- Orange Square -->
+                <li>&#x1F7E8; 100 points</li> <!-- Yellow Square -->
+                <li>&#x1F7E9; 1,000 points</li> <!-- Green Square -->
+                <li>&#x1F7E6; 100,000 points</li> <!-- Blue Square -->
+                <li>&#x1F7EA; 1,000,000 points</li> <!-- Purple Square -->
+              </ul>
+            </li>
+
+
+            <li>When you discover a successful fusion, you'll make a new crystal that is worth <b>10 times</b> as many energy points as the original crystals!
+              For example, successfully fusing two <span style="color: red;">red</span> crystals (1 point) will produce a new <span style="color: orange;">orange</span> crystal (10 points).
+            </li>
+
+            <li><b>Your hover has fuel for up to <span id="instruct-action"></span> actions&mdash;fusing crystals and harvesting them for energy points each consume one action.</b>
+              Use your actions wisely! Focus on finding and fusing crystals to unlock new, more valuable crystals!
+            </li>
+
+
+            <li>
+              To help you keep track of how you've used your actions, we'll show you a table of all the fusions you've attempted
+              and the energy points of all the crystals you have harvested.
+              <b>Keep in mind that crystals differ in their shape and texture, and not all kinds of fusions are likely to work out.</b>
+            </li>
+
+          </ul>
+
+
+
+          <h2 class="instruct-heading">After the game</h2>
+
+          <p>
+            Scientists still do not understand why some pairs of crystals on this planet can fuse, while others do not.
+            At the end of the game, you'll have the chance to leave a <b>message for a future participant who will also harvest crystals on this faraway planet</b>.
+            Share any knowledge or tips you think will help them harvest more energy points.
+            <b>You will receive a bonus based on the energy points that you and this future participant harvest</b>,
+            so try to give them good advice!
+          </p>
+
+          <p>Ready to Begin? Good luck and have fun!</p>
+
+        </div>
+
+        <div class='button-group-vc'>
+          <button class='big-button' id='instruction-btn-1' onclick="hideAndShowNext('instruction', 'task', 'block')">Begin</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="task" class="base" style="display:none;">
+
+      <div id="task-info" style="height: 130px; margin-top: 20px; margin-bottom: 30px;">
+        <p><span id="task-info-points"></span> points, <span id="task-info-actions"></span> actions remaining</p>
+        <br>
+        <p>[SPACE bar: pick a crystal, harvest a crystal, fuse crystals. D key: drop a crystal]</p>
+        <p>Currently Carrying: <span id="task-info-carrying"></span></p>
+        <p>At this Location: <span id="task-info-location"></span></p>
+        <p>Hint: <span id="task-info-hint"></span></p>
+      </div>
+
+      <div id="task-content" style="display:flex; height:500px;">
+
+        <div id="task-grid-wrapper" style="width:500px;">
+
+          <div id="task-grid" style="height: 500px;"></div>
+
+          <div id="task-composer" style="display: none;">
+
+            <p style="padding: 0; margin: 0;">You can now leave some <b>messages for a future player</b>. This message will be passed on to someone who will play the <b>same game</b> you just played, starting with the <b>same initial settings</b>.</p>
+            <!-- <p>Think about what you've learned—strategies, combinations, or tips that could help the next player score more points.</p>-->
+            <p>Share tips or strategies that could help the next player score more points:</p>
+            <textarea id="composer-text-how" style="height: 100px; width: 92%;" placeholder="Type your message here..."></textarea>
+
+            <p>Explain any rules or patterns you noticed when combining items:</p>
+            <textarea id="composer-text-rules" style="height: 100px; width: 92%;" placeholder="Type your message here..."></textarea>
+
+            <p>You will earn a bonus based on how well the future player who reads your message performs in their game. The more points they earn, the bigger your reward!</p>
+
+            <div>
+                <button class="big-button" id="composer-submit" onclick="handle_submit()">Submit</button>
+            </div>
+
+
+          </div>
+
+        </div>
+
+
+        <div id="task-lib-wrapper" style="margin-left:20px; width: 150px; height: 500px;">
+
+          <table id="task-recipe-table" class="scrolldown">
+            <thead>
+              <tr>
+                  <th>Found recipes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Transitions will be inserted here. -->
+            </tbody>
+          </table>
+
+
+          <table id="task-reward-table" class="scrolldown" style="margin-top:10px;">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Points</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Items will be inserted here. -->
+            </tbody>
+          </table>
+
+
+        </div>
+
+      </div>
+
+
+
+      <div id="task-input">
+
+        <div></div>
+
+
+
+      </div>
+
+      <!-- <div class='button-group-vc'>
+        <button class='big-button' id='task-complete-btn' onclick="grid_done()">Next</button>
+      </div> -->
+
+    </div>
+
+
+
+    <div id="debrief" class="base" style="display:none;">
+      <h1>Thank you for your contribution to science</h1>
+      <h4>You will be eligible for full payment once you answer <span style="color:red">all questions</span>.</h4>
+      <form id="postquiz"  class='frame' action="debrief" method="post" style="padding-left:20px;">
+        <b>1.&nbsp;</b>How old are you?:
+         <input
+            id="age" name="age" class="posttestQ" type="number"
+            maxlength = "3" min="18" max="100"step = "1"
+          > years
+        </p>
+        <p>
+          <b>2.&nbsp;</b>What is your gender?
+          <select id="sex" name="sex" class="posttestQ">
+            <option value="noresp" SELECTED></option>
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+            <option value="other">Other</option>
+            <option value="noresponse">I&rsquo;d prefer not to respond</option>
+          </select>
+        </p>
+        <p>
+          <b>3.&nbsp;</b>On a scale of 1-10 (where 10 is the most engaged), please rate how <b>ENGAGING</b> you found the learning task:
+          <select id="engagement" name="engagement" class="posttestQ">
+            <option value="--" SELECTED>
+            <option value="10">10 - Very engaging</option>
+            <option value="9">9</option>
+            <option value="8">8</option>
+            <option value="7">7</option>
+            <option value="6">6</option>
+            <option value="5">5 - Moderately</option>
+            <option value="4">4</option>
+            <option value="3">3</option>
+            <option value="2">2</option>
+            <option value="1">1</option>
+            <option value="0">0 - Not engaged</option>
+          </select>
+        </p>
+        <p>
+          <b>4.&nbsp;</b>On a scale of 1-10 (where 10 is the most difficult), please rate how <b>DIFFICULT</b> you found the learning task:
+          <select id="difficulty" name="difficulty" class="posttestQ">
+            <option value="--" SELECTED>
+            <option value="10">10 - Very difficult</option>
+            <option value="9">9</option>
+            <option value="8">8</option>
+            <option value="7">7</option>
+            <option value="6">6</option>
+            <option value="5">5 - Moderately difficult</option>
+            <option value="4">4</option>
+            <option value="3">3</option>
+            <option value="2">2</option>
+            <option value="1">1</option>
+            <option value="0">0 - Not difficult at all</option>
+          </select>
+        </p>
+        <p><b>5.&nbsp;</b>Do you have any comments regarding the experiment?</p>
+        <textarea name="feedback" id="feedback" placeholder="Please type here" style="width:85%;height:100px;font-size:20px;"></textarea>
+      </form>
+      <div class='button-group-vc'>
+        <button class='big-button' id='done-btn' disabled onclick="is_done('C1N7E123')">Done</button>
+      </div>
+    </div>
+
+    <div id="completed" class="base" style="display:none;" >
+      <div id="code-div">
+        <h1>Your completion code is:</h1>
+        <h1 id="completion-code"></h1>
+      </div>
+    </div>
+
+
+  </body>
+
+
+  <script type="text/javascript" src="./js/utilities.js"></script>
+  <script type="text/javascript" src="./js/identicon/pnglib.js"></script>
+  <script type="text/javascript" src="./js/identicon/identicon.js"></script>
+
+  <script type="text/javascript" src="./js/consent.js"></script>
+  <script type="text/javascript" src="./js/instruction.js"></script>
+
+  <script type="text/javascript" src="./js/config.js"></script>
+  <script type="text/javascript" src="./js/grid.js"></script>
+  <script type="text/javascript" src="./js/task-base.js"></script>
+
+</html>

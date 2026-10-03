@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html>
+
+
+
+  <head>
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"> -->
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <title>Experiment</title>
+    <meta charset="UTF-8">
+  </head>
+
+
+  <body>
+
+    <div id="welcome" class="base" >
+        
+      <div style="text-align: right; padding: 0.5em 1em; font-size: 1em;">
+        <a href="accessibility.html">Accessibility</a>
+      </div>
+
+      <h1>Information for participants</h1>
+      
+      <div id="consent-info"></div>
+      
+      <div class="button-group-vc">
+        <button class="big-button" id="consent-btn" onclick="hideAndShowNext('welcome','prolific_id','block')">I agree</button>
+      </div>
+    
+    </div>
+
+
+
+    <div id="prolific_id" class="base" style="display:none;">
+      <h1>Enter your Prolific ID to continue:</h1>
+      <textarea name="prolific_id_text" id="prolific_id_text" placeholder="" style="width:90%;margin-left:25px;font-size:20px;"></textarea>
+      <div class='button-group-vc'>
+        <button class='big-button' id='prolific_id-btn' onclick="handle_prolific()">Confirm</button>
+      </div>
+    </div>
+
+
+
+    <div id="instruction" class="long-base" style="display:none;">
+  <h1>Instructions</h1>
+
+  <div id="progress-bar">
+    <div class="progress-dots">
+      <div class="dot active" id="dot-1"></div>
+      <div class="dot" id="dot-2"></div>
+      <div class="dot" id="dot-3"></div>
+      <div class="dot" id="dot-4"></div>
+    </div>
+    <span class="progress-label" id="progress-label">Page 1 of 4</span>
+  </div>
+
+  <!-- ══ PAGE 1: Mission ══ -->
+  <div class="instruct-page visible" id="instruct-page-1">
+
+    <p>
+      In this game, you are a space explorer. You just landed on a faraway planet.
+      The surface of this planet is dotted with valuable crystals that can be
+      <strong>harvested</strong> for special energy points.
+    </p>
+    <p>
+      Some of these crystals can also be <strong>fused</strong> to create new and much more powerful
+      crystals. However, scientists still do not fully understand why some pairs of crystals can fuse
+      while others cannot.
+    </p>
+    <p>
+      Your goal is to <strong>harvest as many energy points as possible</strong> by collecting,
+      combining, and harvesting crystals. Explore the planet, experiment with fusions, and
+      maximise your score.
+    </p>
+
+    <img src="../img/_demo.png" height="300" class="instruct-img" alt="Game screenshot">
+
+    <div class="instruct-nav">
+      <button class="big-button hidden">Back</button>
+      <button class="big-button primary" onclick="goToPage(2)">Next &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ══ PAGE 2: How to Play ══ -->
+  <div class="instruct-page" id="instruct-page-2">
+
+    <p>
+      Use <strong>arrow keys</strong> to move your rover across the planet.
+      Everything else is done with <strong>Spacebar</strong> or <strong>D</strong>.
+    </p>
+
+    <table class="key-table">
+      <tr>
+        <td><span class="key">&#x2191; &#x2193; &#x2190; &#x2192;</span></td>
+        <td><span class="key-action-label">Move</span> your rover</td>
+      </tr>
+      <tr>
+        <td><span class="key">Spacebar</span></td>
+        <td>
+          <span class="key-action-label">Pick up</span> the crystal you're standing on
+          <em>(rover must be empty)</em>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="key">Spacebar</span></td>
+        <td>
+          <span class="key-action-label">Attempt a fusion</span> &mdash;
+          while holding a crystal and standing on another
+        </td>
+      </tr>
+      <tr>
+        <td><span class="key">Spacebar</span></td>
+        <td>
+          <span class="key-action-label">Harvest</span> for energy points &mdash;
+          while holding a crystal and standing on an empty tile
+        </td>
+      </tr>
+      <tr>
+        <td><span class="key">D</span></td>
+        <td><span class="key-action-label">Drop</span> the crystal you're holding</td>
+      </tr>
+    </table>
+
+    <p>Your rover holds <strong>one crystal at a time</strong>. 
+      You must pick up, fuse, or harvest before you can interact with another crystal.</p>
+    <p><strong>Harvesting is the only way to earn energy points.</strong> Fusing alone doesn't score&mdash;you need to harvest the resulting crystal.</p>
+    <p>A running log will track every fusion you've attempted and every crystal you've harvested, so you always know how your actions have been spent.</p>
+
+
+
+    <div class="instruct-nav">
+      <button class="big-button" onclick="goToPage(1)">&larr; Back</button>
+      <button class="big-button primary" onclick="goToPage(3)">Next &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ══ PAGE 3: Fusion Guide ══ -->
+  <div class="instruct-page" id="instruct-page-3">
+
+    <p>
+      Naturally-occurring crystals on this planet are <strong>red</strong>.
+      Each red crystal is worth <strong>1 energy point</strong> and can regenerate once after being harvested.
+    </p>
+
+    <p>A crystal's <strong>colour</strong> tells you exactly how many points it's worth:</p>
+
+    <ul class="colour-list">
+      <li>&#x1F7E5;&nbsp; 1 point</li>
+      <li>&#x1F7E7;&nbsp; 10 points</li>
+      <li>&#x1F7E8;&nbsp; 100 points</li>
+      <li>&#x1F7E9;&nbsp; 1,000 points</li>
+      <li>&#x1F7E6;&nbsp; 10,000 points</li>
+      <li>&#x1F7EA;&nbsp; 100,000 points</li>
+    </ul>
+
+    <p>
+      When you discover a successful fusion, you'll produce a new crystal worth
+      <strong>10&times; as many energy points</strong> as the originals.
+      For example, fusing two red crystals (1 pt each) gives you one orange crystal (10 pts).
+    </p>
+
+    <div class="callout">
+      &#x26A1; <strong>Your rover has fuel for up to <span id="instruct-action">40</span> actions.</strong>
+      Every <strong>fusion attempt</strong> and every <strong>harvest</strong> uses one action.
+      Use them wisely!
+    </div>
+
+    <div class="instruct-nav">
+      <button class="big-button" onclick="goToPage(2)">&larr; Back</button>
+      <button class="big-button primary" onclick="goToPage(4)">Next &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ══ PAGE 4: Messages ══ -->
+  <div class="instruct-page" id="instruct-page-4">
+
+    <p>
+      Other people have already played this game. Before finishing, they were asked to
+      <strong>leave a message for the next player</strong> &mdash; that's you.
+    </p>
+    <p>
+      They were told their bonus payment would depend on how well the next player performs,
+      so they had a genuine incentive to be helpful.
+    </p>
+    <p>
+      On the next screen, you'll be able to read their messages and save notes to a notebook
+      you can refer back to during the game.
+    </p>
+
+    <div class="callout">
+      &#x1F504; <strong>Pay it forward:</strong> At the end of the game, you'll have the chance to
+      leave a message for a future participant playing the same game on the same planet.
+      Share any knowledge or tips you think will help them harvest more energy points.
+      <strong>Your bonus will depend both on how well you play and how well they perform</strong>. 
+    </div>
+
+    <p>When you're ready, click <strong>Read messages</strong> to see what previous players left for you &mdash; then begin. Good luck!</p>
+
+    <div class="instruct-nav">
+      <button class="big-button" onclick="goToPage(3)">&larr; Back</button>
+      <button class="big-button primary" onclick="hideAndShowNext('instruction', 'messages', 'block')">Read messages</button>
+    </div>
+  </div>
+
+</div><!-- #instruction -->
+
+    <div id="messages" class="long-base" style="display:none;">
+
+      <!-- ── Phase 1: Browse ───────────────────────────────────────────── -->
+      <div id="messages-browse" >
+
+        <h1>Before you start</h1>
+        <p>We asked previous players (real players!) to leave messages to help you score more points. </p>
+        <p>Click on a player icon to read their message. </p>
+        <p>You can highlight useful parts and save them to your notebook. <strong>Highlight at least one sentence</strong> before continuing.</p>
+
+        <div id="messages-columns" style="display:flex; gap:24px; align-items:flex-start;">
+          <!-- change this and notebook-col to "flex:1" / "flex:1" for 50/50, etc -->
+          <div id="leaderboard-col" style="flex:3;">
+            <h3>Leaderboard</h3>
+            <div id="leaderboard"></div>
+          </div>
+  
+          <div id="notebook-col" style="flex:2;">
+            <h3>📓 Your Notebook</h3>
+            <p id="notebook-empty-hint" style="color:gray; font-size:0.9em;">Nothing saved yet. Highlight text in a message and click <em>Save to Notebook</em>.</p>
+            <ul id="notebook-list"></ul>
+          </div>
+        </div>
+
+        <!-- Modal -->
+        <div id="msg-modal-overlay" >
+          <div id="msg-modal">
+            <h3>Player <span id="msg-modal-rank"></span></h3>
+            <p class="msg-modal-label">Tips &amp; strategies:</p>
+            <div id="msg-modal-how" class="msg-text-block"></div>
+            <p class="msg-modal-label">Fusion rules &amp; patterns:</p>
+            <div id="msg-modal-rules" class="msg-text-block"></div>
+            <p class="msg-modal-hint">💡 Select any text above and click <strong>Save to Notebook</strong> to keep it.</p>
+            <div class="button-group-vc">
+              <button class="big-button" id="msg-save-btn" onclick="saveHighlightToNotebook()">Save to Notebook</button>
+              <button class="big-button" onclick="closeMsgModal()">Close</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="button-group-vc" style="margin-top:10px;">
+          <button class="big-button" id="messages-btn" disabled onclick="showReflect()">Continue</button>
+        </div>
+  
+      </div>
+
+      <!-- ── Phase 2: Reflect ─────────────────────────────────────────── -->
+      <div id="messages-reflect" style="display: none;">
+        <h1>Before you start</h1>
+        <p>Take a moment to think about what stood out in the messages you just read.</p>
+        <p>Below are the notes you saved. Read through them, then write a short summary in your own words.</p>
+        <p>Write carefully! Only your summary will be shown to you as a reminder during the game, NOT your notebook.</p>
+        
+        <div id="messages-columns" style="display:flex; gap:24px; align-items:flex-start;">
+          <div id="reflect-summary-col" style="flex:3;">
+            <h3>✏️ Your Summary (to carry over to the game)</h3>
+            <p>What do you want to remember for the game?</p>
+            <textarea id="reflect-text" style="width:90%; height:200px; font-size:1em;" placeholder="Write your strategy here..."></textarea>
+          </div>
+
+          <div id="reflect-notebook-col" style="flex:2;">
+            <h3>📓 Your Notebook</h3>
+            <p id="reflect-notebook-empty" style="color:gray; font-size:0.9em; display:none;">No notes saved.</p>
+            <ul id="reflect-notebook-list"></ul>
+          </div>
+        </div>
+              
+        <div class="button-group-vc" style="margin-top:10px;">
+          <button class="big-button" id="reflect-btn" disabled onclick="handleReflectDone()">Start the Game</button>
+        </div>
+          
+      </div>
+
+    </div>  
+
+    <div id="task" class="base" style="display: none;">
+
+      <div id="task-info" style="height: 130px; margin-top: 20px; margin-bottom: 30px;">
+        <p><span id="task-info-points"></span> points, <span id="task-info-actions"></span> actions remaining</p>
+        <br>
+        <p>[SPACE: main action (pick up / harvest / fuse) · D: drop]</p>
+        <p>Carrying: <span id="task-info-carrying"></span></p>
+        <p>Here: <span id="task-info-location"></span></p>
+        <p>Hint: <span id="task-info-hint"></span></p>
+      </div>
+
+      <div id="task-content" style="display:flex; height:500px;">
+
+        <div id="task-grid-wrapper" style="width:500px;">
+
+          <div id="task-grid" style="height: 500px;"></div>
+
+
+          <div id="task-strategy" style="margin-top:14px; padding:10px 14px; background:#f7f7f7; border-radius:6px; border-left:3px solid #5a9;">
+            <strong>📓 Your summary:</strong> <span id="task-strategy-text" style="font-style:italic;"></span>
+          </div>
+
+
+          <div id="task-composer" style="display: none;">
+
+            <p style="padding: 0; margin: 0;">Now, it is your turn to leave a message for a future player. </p>
+            <p>This message will be passed on to someone who will play the <b>same game</b> you just played, starting with the <b>same initial settings</b>.</p>
+            <!-- <p>Think about what you've learned—strategies, combinations, or tips that could help the next player score more points.</p>-->
+            <p>Share tips or strategies that could help the next player score more points:</p>
+            <textarea id="composer-text-how" style="height: 100px; width: 92%;" placeholder="Type your message here..."></textarea>
+
+            <p>Explain any rules or patterns you noticed when combining items:</p>
+            <textarea id="composer-text-rules" style="height: 100px; width: 92%;" placeholder="Type your message here..."></textarea>
+
+            <p>You will earn a bonus based on how well the future player who reads your message performs in their game. The more points they earn, the bigger your reward!</p>
+
+            <div>
+                <button class="big-button" id="composer-submit" onclick="handle_submit()">Submit</button>
+            </div>
+
+
+          </div>
+
+        </div>
+
+
+        <div id="task-lib-wrapper" style="margin-left:20px; width: 150px; height: 500px;">
+
+          <table id="task-recipe-table" class="scrolldown">
+            <thead>
+              <tr>
+                  <th>Found recipes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Transitions will be inserted here. -->
+            </tbody>
+          </table>
+
+
+          <table id="task-reward-table" class="scrolldown" style="margin-top:10px;">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Points</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Items will be inserted here. -->
+            </tbody>
+          </table>
+
+
+        </div>
+
+      </div>
+
+
+    </div>
+
+
+
+    <div id="debrief" class="base" style="display:none;">
+      <h1>Thank you for your contribution to science</h1>
+      <h4>You will be eligible for full payment once you answer <span style="color:red">all questions</span>.</h4>
+      <form id="postquiz"  class='frame' action="debrief" method="post" style="padding-left:20px;">
+        <b>1.&nbsp;</b>How old are you?:
+         <input
+            id="age" name="age" class="posttestQ" type="number"
+            maxlength = "3" min="18" max="100"step = "1"
+          > years
+        </p>
+        <p>
+          <b>2.&nbsp;</b>What is your gender?
+          <select id="sex" name="sex" class="posttestQ">
+            <option value="noresp" SELECTED></option>
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+            <option value="other">Other</option>
+            <option value="noresponse">I&rsquo;d prefer not to respond</option>
+          </select>
+        </p>
+        <p>
+          <b>3.&nbsp;</b>On a scale of 1-10 (where 10 is the most engaged), please rate how <b>ENGAGING</b> you found the learning task:
+          <select id="engagement" name="engagement" class="posttestQ">
+            <option value="--" SELECTED>
+            <option value="10">10 - Very engaging</option>
+            <option value="9">9</option>
+            <option value="8">8</option>
+            <option value="7">7</option>
+            <option value="6">6</option>
+            <option value="5">5 - Moderately</option>
+            <option value="4">4</option>
+            <option value="3">3</option>
+            <option value="2">2</option>
+            <option value="1">1</option>
+            <option value="0">0 - Not engaged</option>
+          </select>
+        </p>
+        <p>
+          <b>4.&nbsp;</b>On a scale of 1-10 (where 10 is the most difficult), please rate how <b>DIFFICULT</b> you found the learning task:
+          <select id="difficulty" name="difficulty" class="posttestQ">
+            <option value="--" SELECTED>
+            <option value="10">10 - Very difficult</option>
+            <option value="9">9</option>
+            <option value="8">8</option>
+            <option value="7">7</option>
+            <option value="6">6</option>
+            <option value="5">5 - Moderately difficult</option>
+            <option value="4">4</option>
+            <option value="3">3</option>
+            <option value="2">2</option>
+            <option value="1">1</option>
+            <option value="0">0 - Not difficult at all</option>
+          </select>
+        </p>
+        <p><b>5.&nbsp;</b>Do you have any comments regarding the experiment?</p>
+        <textarea name="feedback" id="feedback" placeholder="Please type here" style="width:85%;height:100px;font-size:20px;"></textarea>
+      </form>
+      <div class='button-group-vc'>
+        <button class='big-button' id='done-btn' disabled onclick="is_done('C1FEOWRK')">Done</button>
+      </div>
+    </div>
+
+    <div id="completed" class="base" style="display:none;" >
+      <div id="code-div">
+        <h1>Your completion code is:</h1>
+        <h1 id="completion-code"></h1>
+      </div>
+    </div>
+
+
+  </body>
+
+  <script type="text/javascript" src="./js/messages.js"></script>
+
+  <script type="text/javascript" src="./js/utilities.js"></script>
+  <script type="text/javascript" src="./js/identicon/pnglib.js"></script>
+  <script type="text/javascript" src="./js/identicon/identicon.js"></script>
+
+  <script type="text/javascript" src="./js/consent.js"></script>
+  <script type="text/javascript" src="./js/instruction.js"></script>
+
+  <script type="text/javascript" src="./js/config.js"></script>
+  <script type="text/javascript" src="./js/grid.js"></script>
+  <script type="text/javascript" src="./js/selection.js"></script>
+  <script type="text/javascript" src="./js/task-after.js"></script>
+
+</html>

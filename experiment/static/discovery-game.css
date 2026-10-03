@@ -1,0 +1,97 @@
+#task-grid {
+  background-color: transparent;
+  gap: 0;
+  width: max-content;
+  grid-template-columns: repeat(15, 24px) !important;
+  grid-template-rows: repeat(15, 24px) !important;
+}
+
+.grid-cell {
+  width: 24px;
+  height: 24px;
+  background-color: #5A5A5A;
+  border: 1px solid #4A4A4A;
+  box-sizing: border-box;
+}
+
+.item-image {
+  width: 22px !important;
+  height: 22px !important;
+}
+
+#timeline-progress-bar,
+#trial-progress-bar,
+#trial-progress-caption,
+.progress:has(#timeline-progress-bar),
+.progress:has(#trial-progress-bar) {
+  display: none !important;
+}
+
+#action-progress-wrapper {
+  width: 100%;
+  max-width: 460px;
+  height: 14px;
+  margin: 4px 0 8px 0;
+  background: #d7d7d7;
+  border: 1px solid #4a4a4a;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+#action-progress-label {
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+#action-progress-bar {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #4caf50, #f6c445);
+  transition: width 0.25s ease;
+}
+
+#psynet-finish-exhausted-board {
+  margin-left: 8px;
+}
+
+#task {
+  height: auto !important;
+  min-height: 0;
+}
+
+#task-info {
+  height: auto !important;
+  margin-top: 0 !important;
+  margin-bottom: 4px !important;
+  font-size: 15px;
+}
+
+#task-info p {
+  line-height: 1.05;
+}
+
+#task-info > p:first-child {
+  display: none !important;
+}
+
+#task-content {
+  height: auto !important;
+  min-height: 0;
+}
+
+#task-strategy {
+  height: auto !important;
+  min-height: 46px;
+  line-height: 1.35;
+  margin-top: 0 !important;
+  margin-bottom: 8px;
+  max-width: 460px;
+  overflow: visible;
+  white-space: normal;
+}
+
+#task-strategy-text {
+  display: inline;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
