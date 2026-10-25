@@ -203,6 +203,8 @@
 
   if (typeof updateAction === 'function') {
     const upstreamUpdateAction = updateAction;
+    // grid.js charges one action inside updateAction(); this wrapper only
+    // refreshes the progress bar after that charge.
     updateAction = function (data) {
       upstreamUpdateAction(data);
       updateActionProgressBar();
@@ -228,18 +230,10 @@
 
   if (typeof handleSpacePress === 'function') {
     const upstreamHandleSpacePress = handleSpacePress;
+    // Do not count actions here: updateAction() already does, and counting
+    // again made every move cost 2 actions.
     handleSpacePress = function () {
-      const beforePoints = typeof POINTS === 'undefined' ? 0 : POINTS;
-      const beforeTransitions = typeof transitions === 'undefined' ? 0 : transitions.length;
       upstreamHandleSpacePress();
-      const afterPoints = typeof POINTS === 'undefined' ? beforePoints : POINTS;
-      const afterTransitions = typeof transitions === 'undefined' ? beforeTransitions : transitions.length;
-      if (
-        Object.keys(currentActionData()).length <= adapterSpentActions &&
-        (afterPoints !== beforePoints || afterTransitions !== beforeTransitions)
-      ) {
-        adapterSpentActions += 1;
-      }
       updateActionProgressBar();
       finishIfBoardIsExhausted();
     };
