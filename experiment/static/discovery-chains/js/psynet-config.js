@@ -8,7 +8,7 @@ const discoveryGameConfig = discoveryDefinition.game_config;
 const MAX_ACTIONS = discoveryGameConfig.action_budget;
 const gridSize = discoveryGameConfig.grid_size;
 const conditions = discoveryDefinition.run_parameters.conditions;
-const COND = discoveryDefinition.condition === "hard" ? "hard-1" : discoveryDefinition.condition;
+const COND = discoveryDefinition.condition === "hard" ? "hard-3" : discoveryDefinition.condition;
 
 let items = discoveryGameConfig.items.map(item => ({
   item_name: item.item_name,

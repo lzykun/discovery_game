@@ -109,11 +109,10 @@ def transition_succeeds(condition: str, held: str, target: str) -> bool:
     if condition == "medium":
         return shape_sum == 3 and held_parts["texture"] != target_parts["texture"]
     if condition == "hard":
-        # The reference repository experimented with several hard variants. We
-        # keep one deterministic variant under the public hard label.
+        # Same as modRule3 in discovery-messages config.js (the final hard rule)
         return shape_sum == 3 and (
             TEXTURES.index(held_parts["texture"]) % 2 == 0
-            or TEXTURES.index(target_parts["texture"]) % 2 == 0
+            or TEXTURES.index(target_parts["texture"]) % 2 == 1
         )
     raise ValueError(f"Unknown condition: {condition}")
 
