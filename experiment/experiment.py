@@ -621,6 +621,8 @@ trial_maker = ChainTrialMaker(
     propagate_failure=False,
 )
 
+# PsyNet's default is 5 min, too short for instructions + messages + game + writing.
+trial_maker.response_timeout_sec = 60 * 20
 
 class Exp(psynet.experiment.Experiment):
     label = "Aggregated discovery-chain crystal game"
