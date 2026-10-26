@@ -35,120 +35,155 @@
 
 
 
-    <div id="instruction" class="long-base" style="display:none;">
-      <h1>Instructions</h1>
+  <div id="instruction" class="long-base" style="display:none;">
+  <h1>Instructions</h1>
 
-      <div id="instruction-1">
-        <div id="instruction-1-content" style="padding-left:5px">
+  <div id="progress-bar">
+    <div class="progress-dots">
+      <div class="dot active" id="dot-1"></div>
+      <div class="dot" id="dot-2"></div>
+      <div class="dot" id="dot-3"></div>
+      <div class="dot" id="dot-4"></div>
+    </div>
+    <span class="progress-label" id="progress-label">Page 1 of 4</span>
+  </div>
 
-          <p>
-            Welcome, and thank you for participating in our study! Please read the instructions carefully.
-          </p>
+  <!-- ══ PAGE 1: Mission ══ -->
+  <div class="instruct-page visible" id="instruct-page-1">
 
+    <p>
+      In this game, you are a space explorer. You just landed on a faraway planet.
+      The surface of this planet is dotted with valuable crystals that can be
+      <strong>harvested</strong> for special energy points.
+    </p>
+    <p>
+      Some of these crystals can also be <strong>fused</strong> to create new and much more powerful
+      crystals. However, scientists still do not fully understand why some pairs of crystals can fuse
+      while others cannot.
+    </p>
+    <p>
+      Your goal is to <strong>harvest as many energy points as possible</strong> by collecting,
+      combining, and harvesting crystals. Explore the planet, experiment with fusions, and
+      maximise your score.
+    </p>
 
-          <h2 class="instruct-heading">Objective</h2>
+    <img src="/static/discovery-chains/img/_demo.png" height="300" class="instruct-img" alt="Game screenshot">
 
-          <p>
-            <b>In this game, you are a space explorer.</b>
-            You have discovered a faraway planet with a curious property &mdash;
-            the surface of the planet is dotted with valuable crystals that can be <b>harvested</b> for energy points.
-            Some of these crystals can also be <b>fused to make new</b> and much more powerful crystals;
-            however, scientists still do not understand why some pairs of crystals can fuse while others cannot.
-          </p>
+    <div class="instruct-nav">
+      <button class="big-button hidden">Back</button>
+      <button class="big-button primary" onclick="goToPage(2)">Next &rarr;</button>
+    </div>
+  </div>
 
-          <p>
-            Your goal is to <b>harvest the most energy points possible</b>
-            by collecting, combining, and harvesting crystals.
-            Explore the planet to discover new, more rewarding crystals and maximize your score.
-          </p>
+  <!-- ══ PAGE 2: How to Play ══ -->
+  <div class="instruct-page" id="instruct-page-2">
 
-            <img src="/static/discovery-chains/img/_demo.png" height="300" style="margin-left: 20px;"><br>
+    <p>
+      Use <strong>arrow keys</strong> to move your rover across the planet.
+      Everything else is done with <strong>Spacebar</strong> or <strong>D</strong>.
+    </p>
 
+    <table class="key-table">
+      <tr>
+        <td><span class="key">&#x2191; &#x2193; &#x2190; &#x2192;</span></td>
+        <td><span class="key-action-label">Move</span> your rover</td>
+      </tr>
+      <tr>
+        <td><span class="key">Spacebar</span></td>
+        <td>
+          <span class="key-action-label">Pick up</span> the crystal you're standing on
+          <em>(rover must be empty)</em>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="key">Spacebar</span></td>
+        <td>
+          <span class="key-action-label">Attempt a fusion</span> &mdash;
+          while holding a crystal and standing on another
+        </td>
+      </tr>
+      <tr>
+        <td><span class="key">Spacebar</span></td>
+        <td>
+          <span class="key-action-label">Harvest</span> for energy points &mdash;
+          while holding a crystal and standing on an empty tile
+        </td>
+      </tr>
+      <tr>
+        <td><span class="key">D</span></td>
+        <td><span class="key-action-label">Drop</span> the crystal you're holding</td>
+      </tr>
+    </table>
 
-          <h2 class="instruct-heading">How to play:</h2>
-          <ol>
-            <li><b>Move your space rover</b>: Use the <b>arrow keys</b> to move around the planet.<br>
-              <img src="/static/discovery-chains/img/_keys.gif" height="50" style="margin-left: 20px;"></li>
-
-            <li>
-              <b>To pick up a crystal</b>: Stand on top of a crystal and press the <b>spacebar</b>.
-              You must have your rover's stock empty to pick something up!
-            </li>
-
-            <li>
-              <b>To fuse crystals</b>: Stand on top of a crystal while holding another crystal in your stock and press the <b>spacebar</b>.
-              Not all crystals can be fused&mdash;but, if you do discover a successful fusion,
-              it will make a new crystal that is worth 10 times more energy points.
-            </li>
-
-            <li>
-              <b>To harvest a crystal</b>: Press the <b>spacebar</b> while you are holding a crystal in the hover and standing on an empty spot.
-              Harvesting crystals is the only way to earn energy points.
-            </li>
-
-            <li>
-              <b>To drop a crystal</b>: Press the <b>D key</b> to drop the crystal you are holding&mdash;this will free up your space hover.
-            </li>
-
-          </ol>
-
-
-          <h2 class="instruct-heading">Fusion guide:</h2>
-          <ul>
-
-            <li>On this planet, naturally-occurring crystals are <b>red</b>. Each red crystal is worth 1 energy point, and they can regenerate once. </li>
-
-            <li>Each crystal's color shows how many energy points it's worth:
-              <ul>
-                <li>&#x1F7E5; 1 point</li> <!-- Red Square -->
-                <li>&#x1F7E7; 10 points</li> <!-- Orange Square -->
-                <li>&#x1F7E8; 100 points</li> <!-- Yellow Square -->
-                <li>&#x1F7E9; 1,000 points</li> <!-- Green Square -->
-                <li>&#x1F7E6; 100,000 points</li> <!-- Blue Square -->
-                <li>&#x1F7EA; 1,000,000 points</li> <!-- Purple Square -->
-              </ul>
-            </li>
-
-
-            <li>When you discover a successful fusion, you'll make a new crystal that is worth <b>10 times</b> as many energy points as the original crystals!
-              For example, successfully fusing two <span style="color: red;">red</span> crystals (1 point) will produce a new <span style="color: orange;">orange</span> crystal (10 points).
-            </li>
-
-            <li><b>Your hover has fuel for up to <span id="instruct-action"></span> actions&mdash;fusing crystals and harvesting them for energy points each consume one action.</b>
-              Use your actions wisely! Focus on finding and fusing crystals to unlock new, more valuable crystals!
-            </li>
-
-
-            <li>
-              To help you keep track of how you've used your actions, we'll show you a table of all the fusions you've attempted
-              and the energy points of all the crystals you have harvested.
-              <b>Keep in mind that crystals differ in their shape and texture, and not all kinds of fusions are likely to work out.</b>
-            </li>
-
-          </ul>
+    <p>Your rover holds <strong>one crystal at a time</strong>. 
+      You must pick up, fuse, or harvest before you can interact with another crystal.</p>
+    <p><strong>Harvesting is the only way to earn energy points.</strong> Fusing alone doesn't score&mdash;you need to harvest the resulting crystal.</p>
+    <p>A running log will track every fusion you've attempted and every crystal you've harvested, so you always know how your actions have been spent.</p>
 
 
 
-          <h2 class="instruct-heading">After the game</h2>
+    <div class="instruct-nav">
+      <button class="big-button" onclick="goToPage(1)">&larr; Back</button>
+      <button class="big-button primary" onclick="goToPage(3)">Next &rarr;</button>
+    </div>
+  </div>
 
-          <p>
-            Scientists still do not understand why some pairs of crystals on this planet can fuse, while others do not.
-            At the end of the game, you'll have the chance to leave a <b>message for a future participant who will also harvest crystals on this faraway planet</b>.
-            Share any knowledge or tips you think will help them harvest more energy points.
-            <b>You will receive a bonus based on the energy points that you and this future participant harvest</b>,
-            so try to give them good advice!
-          </p>
+  <!-- ══ PAGE 3: Fusion Guide ══ -->
+  <div class="instruct-page" id="instruct-page-3">
 
-          <p>Ready to Begin? Good luck and have fun!</p>
+    <p>
+      Naturally-occurring crystals on this planet are <strong>red</strong>.
+      Each red crystal is worth <strong>1 energy point</strong> and can regenerate once after being harvested.
+    </p>
 
-        </div>
+    <p>A crystal's <strong>colour</strong> tells you exactly how many points it's worth:</p>
 
-        <div class='button-group-vc'>
-          <button class='big-button' id='instruction-btn-1' onclick="hideAndShowNext('instruction', 'task', 'block')">Begin</button>
-        </div>
-      </div>
+    <ul class="colour-list">
+      <li>&#x1F7E5;&nbsp; 1 point</li>
+      <li>&#x1F7E7;&nbsp; 10 points</li>
+      <li>&#x1F7E8;&nbsp; 100 points</li>
+      <li>&#x1F7E9;&nbsp; 1,000 points</li>
+      <li>&#x1F7E6;&nbsp; 10,000 points</li>
+      <li>&#x1F7EA;&nbsp; 100,000 points</li>
+    </ul>
+
+    <p>
+      When you discover a successful fusion, you'll produce a new crystal worth
+      <strong>10&times; as many energy points</strong> as the originals.
+      For example, fusing two red crystals (1 pt each) gives you one orange crystal (10 pts).
+    </p>
+
+    <div class="callout">
+      &#x26A1; <strong>Your rover has fuel for up to <span id="instruct-action">40</span> actions.</strong>
+      Every <strong>fusion attempt</strong> and every <strong>harvest</strong> uses one action.
+      Use them wisely!
     </div>
 
+    <div class="instruct-nav">
+      <button class="big-button" onclick="goToPage(2)">&larr; Back</button>
+      <button class="big-button primary" onclick="goToPage(4)">Next &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ══ PAGE 4: Messages ══ -->
+  <div class="instruct-page" id="instruct-page-4">
+
+    <div class="callout">
+      &#x1F504; <strong>Pay it forward:</strong> At the end of the game, you'll have the chance to
+      leave a message for a future participant playing the same game on the same planet.
+      Share any knowledge or tips you think will help them harvest more energy points.
+      <strong>Your bonus will depend both on how well you play and how well they perform</strong>. 
+    </div>
+
+    <p>When you're ready, click <strong>Begin</strong> to start the game. Good luck!</p>
+
+    <div class="instruct-nav">
+      <button class="big-button" onclick="goToPage(3)">&larr; Back</button>
+      <button class="big-button primary" onclick="hideAndShowNext('instruction', 'task', 'block')">Begin</button>
+    </div>
+  </div>
+
+</div><!-- #instruction -->
     <div id="task" class="base" style="display:none;">
 
       <div id="task-info" style="height: 130px; margin-top: 20px; margin-bottom: 30px;">
