@@ -19,7 +19,10 @@ from copy import deepcopy
 from typing import Any, Dict, Iterable, List
 
 import psynet.experiment
+from markupsafe import Markup
 from psynet.bot import Bot
+from psynet.consent import Consent
+from psynet.modular_page import ModularPage, PushButtonControl
 from psynet.demography.general import ExperimentFeedback
 from psynet.page import InfoPage
 from psynet.timeline import Page, Timeline
@@ -624,10 +627,145 @@ trial_maker = ChainTrialMaker(
 # PsyNet's default is 5 min, too short for instructions + messages + game + writing.
 trial_maker.response_timeout_sec = 60 * 20
 
+# Text of the approved Participant Information Sheet (Informatics ethics ref 886284).
+# Place holders: 638, 670, 678 
+CONSENT_HTML = """
+<h1>Participant Information Sheet</h1>
+<p>
+  <b>Project title:</b> Learning and Reasoning in Interactions<br>
+  <b>Principal investigator:</b> Dr. Bonan Zhao<br>
+  <b>Researcher collecting data:</b> Zhangyekun Li<br>
+  <b>Funder (if applicable):</b> [FUNDER]
+</p>
+<p>
+  This study was certified according to the Informatics Research Ethics Process,
+  reference number 886284. Please take time to read the following information carefully.
+  You should keep this page for your records.
+</p>
+
+<h4>Who are the researchers?</h4>
+<p>Principal Investigator: Dr. Bonan Zhao.</p>
+
+<h4>What is the purpose of the study?</h4>
+<p>
+  This research investigates how people identify patterns, infer hidden rules,
+  and communicate their reasoning in interactive environments.
+</p>
+
+<h4>Do I have to take part?</h4>
+<p>
+  No &ndash; participation in this study is entirely up to you. You can withdraw from the study
+  at any time, without giving a reason. Your rights will not be affected. If you wish to withdraw,
+  contact the PI. We will stop using your data in any publications or presentations submitted
+  after you have withdrawn consent. However, we will keep copies of your original consent,
+  and of your withdrawal request.
+</p>
+
+<h4>What will happen if I decide to take part?</h4>
+<p>
+  If you decide to participate, you will be asked to complete a series of tasks related to
+  decision-making, pattern identification, and reasoning. You will provide responses to questions
+  regarding your judgments on patterns, probabilities, and causal relationships. Data will be
+  collected through interactive online tasks, including written responses to prompts.
+  The session will last approximately [X] minutes.
+</p>
+<p>
+  Your participation will not involve any audio or video recording. The study will be conducted
+  entirely online, and you can complete it at a time that is convenient for you.
+</p>
+
+<h4>Compensation</h4>
+<p>You will be paid &pound;[X] for your participation in this study.</p>
+
+<h4>Are there any risks associated with taking part?</h4>
+<p>There are no significant risks associated with participation.</p>
+
+<h4>Are there any benefits associated with taking part?</h4>
+<p>
+  While there are no direct benefits beyond compensation for your participation, this research
+  aims to enhance our understanding of human cognition, which could contribute to the development
+  of automated systems capable of solving complex problems that humans can easily address with
+  minimal guidance.
+</p>
+
+<h4>What will happen to the results of this study?</h4>
+<p>
+  The results of this study may be summarised in published articles, reports and presentations.
+  Quotes or key findings will be anonymized: We will remove any information that could, in our
+  assessment, allow anyone to identify you. With your consent, information can also be used for
+  future research. Your data may be archived for a minimum of two years.
+</p>
+
+<h4>Data protection and confidentiality</h4>
+<p>
+  Your data will be processed in accordance with Data Protection Law. All information collected
+  about you will be kept strictly confidential. Your data will be referred to by a unique
+  participant number rather than by name. Your data will only be viewed by the researcher/research team.
+</p>
+<p>
+  All electronic data will be stored on a password-protected encrypted computer, on the School of
+  Informatics&rsquo; secure file servers, or on the University&rsquo;s secure encrypted cloud storage
+  services (DataShare, ownCloud, or Sharepoint) and all paper records will be stored in a locked
+  filing cabinet in the PI&rsquo;s office. Your consent information will be kept separately from
+  your responses in order to minimise risk.
+</p>
+
+<h4>What are my data protection rights?</h4>
+<p>
+  The University of Edinburgh is a Data Controller for the information you provide. You have the
+  right to access information held about you. Your right of access can be exercised in accordance
+  Data Protection Law. You also have other rights including rights of correction, erasure and
+  objection. For more details, including the right to lodge a complaint with the Information
+  Commissioner&rsquo;s Office, please visit <a href="https://www.ico.org.uk" target="_blank">www.ico.org.uk</a>.
+  Questions, comments and requests about your personal data can also be sent to the University
+  Data Protection Officer at <a href="mailto:dpo@ed.ac.uk">dpo@ed.ac.uk</a>.
+</p>
+<p>
+  For general information about how we use your data, go to:
+  <a href="https://edin.ac/privacy-research" target="_blank">edin.ac/privacy-research</a>
+</p>
+
+<h4>Who can I contact?</h4>
+<p>
+  If you have any further questions about the study, please contact the lead researcher,
+  Dr. Bonan Zhao (<a href="mailto:b.zhao@ed.ac.uk">b.zhao@ed.ac.uk</a>).
+</p>
+<p>
+  If you wish to make a complaint about the study, please contact
+  <a href="mailto:inf-ethics@inf.ed.ac.uk">inf-ethics@inf.ed.ac.uk</a>. When you contact us,
+  please provide the study title and detail the nature of your complaint.
+</p>
+
+<h4>Updated information</h4>
+<p>
+  If the research project changes in any way, an updated Participant Information Sheet will be
+  made available on
+  <a href="http://web.inf.ed.ac.uk/infweb/research/study-updates" target="_blank">http://web.inf.ed.ac.uk/infweb/research/study-updates</a>.
+</p>
+
+<h4>Consent</h4>
+<p>By proceeding with the study, I agree to all of the following statements:</p>
+<ul>
+  <li>I have read and understood the above information.</li>
+  <li>I understand that my participation is voluntary, and I can withdraw at any time.</li>
+  <li>I consent to my anonymised data being used in academic publications and presentations.</li>
+  <li>I allow my data to be used in future ethically approved research.</li>
+</ul>
+"""
+class StudyConcentPage(ModularPage, Consent):
+    def __init__(self):
+        super().__init__(
+            "consent",
+            Markup(CONSENT_HTML),
+            PushButtonControl(choices=["agree"], labels=["I agree"], arrange_vertically=False),
+            time_estimate=60,
+        )
+
 class Exp(psynet.experiment.Experiment):
     label = "Aggregated discovery-chain crystal game"
 
     timeline = Timeline(
+        StudyConcentPage(),
         InfoPage(
             "You will play a crystal discovery game. Later generations may read messages aggregated from earlier players.",
             time_estimate=5,
