@@ -28,16 +28,28 @@ from psynet.page import InfoPage
 from psynet.timeline import Page, Timeline
 from psynet.trial.chain import ChainNode, ChainTrial, ChainTrialMaker
 
+# ---------------------------------------------------------------------------
+# Settings
+# ---------------------------------------------------------------------------
 
+# Which versions this file was built against (for the record only; nothing reads them).
 PSYNET_SOURCE_COMMIT = "57f352b9e41a85cd6c1b18b603bcf96eddbbeed0"
 REFERENCE_REPOSITORY = "https://github.com/zhaobn/discovery-chains"
 REFERENCE_COMMIT = "b89fcf85a475a8757f4d0bac6238edbb2ba43ca3"
 
+# The crystal world: 4 shapes x 4 textures = 16 starting (level 0) crystals.
+# Order matters: the rules below use each shape's and texture's index in these lists.
 SHAPES = ["triangle", "circle", "square", "diamond"]
 TEXTURES = ["plain", "checkered", "stripes", "dots"]
 MAX_LEVEL = 6
 PLAYER_START = {"x": 7, "y": 7}
 
+# Two ready-made experiment sizes. "compact" is for testing on local machine;
+# "full" is a larger design. ACTIVE_CONFIG_NAME below picks which one runs.
+#   chains x conditions = number of separate chains
+#   generations         = how many generations each chain grows
+#   participants_per_generation = players per generation in one chain
+#   message_sample_size = how many messages the next generation can read
 RUN_CONFIGS: Dict[str, Dict[str, Any]] = {
     "compact": {
         "mode": "compact",
@@ -69,10 +81,16 @@ RUN_CONFIGS: Dict[str, Dict[str, Any]] = {
     },
 }
 
+# Switch between "compact" and "full" here.
 ACTIVE_CONFIG_NAME = "compact"
 ACTIVE_CONFIG = RUN_CONFIGS[ACTIVE_CONFIG_NAME]
 
+# ---------------------------------------------------------------------------
+# Helpers and game rules (a Python copy of the rules in JS, used by the bot)
+# ---------------------------------------------------------------------------
 
+# Cleans players' message text before it is stored or passed on.
+# Note: it also removes quotes and apostrophes, so "don't" becomes "dont".
 def sanitize_text(text: Any) -> str:
     """Keep message content readable while avoiding parser-hostile characters."""
     if text is None:
@@ -82,16 +100,16 @@ def sanitize_text(text: Any) -> str:
     text = re.sub(r"\s+", " ", text)
     return text.strip()
 
-
+# Crystal names look like "circle_dots_0": shape, texture, level.
 def item_name(shape: str, texture: str, level: int) -> str:
     return f"{shape}_{texture}_{level}"
-
 
 def parse_item(name: str) -> Dict[str, Any]:
     shape, texture, level = name.split("_")
     return {"shape": shape, "texture": texture, "level": int(level)}
 
-
+# What a successful fusion produces: the held crystal's shape, the target's
+# texture, one level higher. Nothing is produced past MAX_LEVEL.
 def new_object(held: str, target: str) -> str:
     held_parts = parse_item(held)
     target_parts = parse_item(target)
@@ -100,7 +118,9 @@ def new_object(held: str, target: str) -> str:
         return ""
     return item_name(held_parts["shape"], target_parts["texture"], new_level)
 
-
+# Whether fusing `held` onto `target` works, for each condition.
+# Must match the JS rules the players see (static/discovery-chains/js/), or the
+# bot plays a different game from the humans.
 def transition_succeeds(condition: str, held: str, target: str) -> bool:
     held_parts = parse_item(held)
     target_parts = parse_item(target)
@@ -119,11 +139,16 @@ def transition_succeeds(condition: str, held: str, target: str) -> bool:
         )
     raise ValueError(f"Unknown condition: {condition}")
 
-
+# A crystal of level n is worth 10^n points (red = 1, orange = 10, ...).
 def item_points(name: str) -> int:
     return 10 ** parse_item(name)["level"]
 
+# ---------------------------------------------------------------------------
+# What each player is given: board layout and the trial definition
+# ---------------------------------------------------------------------------
 
+# Places the 16 starting crystals on the grid at random but reproducibly:
+# the same seed (chain, condition, player) always gives the same board.
 def make_layout(
     config: Dict[str, Any],
     chain_id: int,
@@ -156,7 +181,8 @@ def make_layout(
         for name, (x, y) in sorted(positions.items())
     ]
 
-
+# Everything the browser game needs to set itself up: grid size, action budget,
+# the condition's rule, and this player's board. Read in JS by psynet-config.js.
 def make_game_config(
     config: Dict[str, Any],
     chain_id: int,
@@ -179,7 +205,7 @@ def make_game_config(
         "layout_scope": "participant" if participant_key is not None else "node",
     }
 
-
+# The definition of generation 0 in one chain: no incoming messages yet.
 def make_start_definition(config: Dict[str, Any], chain_id: int, condition: str) -> Dict[str, Any]:
     return {
         "chain_id": chain_id,
@@ -195,12 +221,19 @@ def make_start_definition(config: Dict[str, Any], chain_id: int, condition: str)
         },
     }
 
+# ---------------------------------------------------------------------------
+# Passing messages to the next generation
+# ---------------------------------------------------------------------------
 
+# A trial's saved answer as a dict (empty if missing).
 def normalized_trial_answer(trial: ChainTrial) -> Dict[str, Any]:
     answer = trial.answer or {}
     return answer if isinstance(answer, dict) else {}
 
-
+# Chooses which messages from one generation the next generation will read.
+# Same procedure as python/prepare_messages.py: rank players by points,
+# then draw up to message_sample_size messages, weighted by log(points + 1),
+# and show them in rank order.
 def aggregate_trials(
     trials: Iterable[ChainTrial],
     definition: Dict[str, Any],
@@ -285,7 +318,10 @@ def aggregate_trials(
         "selected_messages": messages,
     }
 
-
+# One node = one generation of one chain. PsyNet calls these methods:
+#   summarize_trials:     when a generation is complete, to aggregate its trials
+#   make_next_definition: to build the next generation's definition, which
+#                         carries the chosen messages as incoming_message_set
 class DiscoveryChainNode(ChainNode):
     def create_initial_seed(self, experiment, participant):
         return {}
@@ -323,7 +359,13 @@ class DiscoveryChainNode(ChainNode):
         }
         return next_definition
 
+# ---------------------------------------------------------------------------
+# The bot (used by `psynet test local` and `psynet simulate`, never by humans)
+# ---------------------------------------------------------------------------
 
+# Plays the game in Python instead of in the browser and returns an answer in
+# the same shape as psynet-adapter.js's buildAnswer(), so the rest of the
+# pipeline (aggregation, export) cannot tell bots and humans apart.
 def scripted_game_answer(definition: Dict[str, Any], participant_id: int | None = None) -> Dict[str, Any]:
     """Deterministic bot answer matching the browser answer schema."""
     config = definition["game_config"]
@@ -518,7 +560,15 @@ def scripted_game_answer(definition: Dict[str, Any], participant_id: int | None 
         "source": "psynet_bot_script",
     }
 
+# ---------------------------------------------------------------------------
+# The page each player sees, and how PsyNet uses our classes
+# ---------------------------------------------------------------------------
 
+# The game page. PsyNet fills the HTML template and sends it to the browser;
+# js_vars puts this player's definition into the page as
+# psynet.var["trial_definition"], which the JS reads.
+# Generation 0 gets discovery-base.html (no messages to read);
+# later generations get discovery-after.html (read messages first).
 class DiscoveryGamePage(Page):
     def __init__(self, definition: Dict[str, Any], label: str, time_estimate: float):
         self.definition = definition
@@ -534,10 +584,12 @@ class DiscoveryGamePage(Page):
             js_vars={"trial_definition": definition},
             session_id=f"discovery-{definition['chain_id']}-{definition['generation_index']}-{definition.get('trial_index_within_generation', 0)}",
         )
-
+    # What a bot "clicks" on this page: PsyNet calls this instead of waiting for a browser
     def get_bot_response(self, experiment, bot):
         return scripted_game_answer(self.definition, participant_id=bot.id)
 
+    # Runs on the server when the browser submits: cleans the messages and
+    # stamps chain, condition and generation onto the saved answer.
     def format_answer(self, raw_answer, **kwargs):
         answer = raw_answer if isinstance(raw_answer, dict) else json.loads(raw_answer)
         outgoing = answer.setdefault("messages", {}).setdefault("outgoing", {})
@@ -551,6 +603,7 @@ class DiscoveryGamePage(Page):
         answer["game_config"] = deepcopy(self.definition["game_config"])
         return answer
 
+    # Refuses a submission with an empty message; the player sees this text.
     def validate(self, response, answer=None, **kwargs):
         answer = answer if isinstance(answer, dict) else getattr(response, "answer", {})
         outgoing = (
@@ -565,9 +618,13 @@ class DiscoveryGamePage(Page):
         return None
 
 
+# One trial = one player's single game. time_estimate (seconds) is what PsyNet
+# uses to estimate the study's length and pay.
 class DiscoveryTrial(ChainTrial):
     time_estimate = 90
 
+    # Called by PsyNet when a player is assigned to a generation: starts from the
+    # node's definition and adds this player's own board.
     def make_definition(self, experiment, participant):
         definition = super().make_definition(experiment, participant)
         definition["trial_index_within_generation"] = int(self.node.n_viable_trials)
@@ -580,6 +637,7 @@ class DiscoveryTrial(ChainTrial):
         )
         return definition
 
+    # Called by PsyNet to get the page to show for this trial.
     def show_trial(self, experiment, participant):
         return DiscoveryGamePage(
             definition=self.definition,
@@ -587,7 +645,11 @@ class DiscoveryTrial(ChainTrial):
             time_estimate=self.time_estimate,
         )
 
-
+# ---------------------------------------------------------------------------
+# Building the chains and the experiment
+# ---------------------------------------------------------------------------
+ 
+# One starting node (generation 0) per chain and condition.
 def get_start_nodes() -> List[DiscoveryChainNode]:
     nodes: List[DiscoveryChainNode] = []
     for chain_id in range(ACTIVE_CONFIG["chains"]):
@@ -602,6 +664,9 @@ def get_start_nodes() -> List[DiscoveryChainNode]:
     return nodes
 
 
+# Tells PsyNet how to run the chains: which classes to use, how many chains,
+# generations and players per generation, and that each player plays once
+# ("across" = each generation is played by new participants).
 trial_maker = ChainTrialMaker(
     id_="discovery_chain",
     trial_class=DiscoveryTrial,
@@ -761,6 +826,8 @@ class StudyConcentPage(ModularPage, Consent):
             time_estimate=60,
         )
 
+# The experiment PsyNet looks for in this file. Its timeline is the order of
+# pages every participant goes through.
 class Exp(psynet.experiment.Experiment):
     label = "Aggregated discovery-chain crystal game"
 
@@ -773,7 +840,7 @@ class Exp(psynet.experiment.Experiment):
         trial_maker,
         ExperimentFeedback(),
     )
-
+    # How many bots `psynet test local` sends: exactly enough to fill every chain.
     test_n_bots = (
         ACTIVE_CONFIG["chains"]
         * len(ACTIVE_CONFIG["conditions"])
@@ -782,6 +849,9 @@ class Exp(psynet.experiment.Experiment):
     )
     test_time_factor = 0.1
 
+ 
+    # Run after the bots finish: checks that every chain grew correctly and that
+    # every generation after 0 received the previous generation's messages.
     def test_check_bots(self, bots: List[Bot]):
         # Give chain growth a short moment after the last finalized trial.
         time.sleep(1.0)
