@@ -54,7 +54,7 @@ RUN_CONFIGS: Dict[str, Dict[str, Any]] = {
     "compact": {
         "mode": "compact",
         "chains": 1,
-        "conditions": ["easy"],
+        "conditions": ["easy", "medium", "hard"],
         "generations": 3,
         "participants_per_generation": 2,
         "message_sample_size": 10,
@@ -367,7 +367,7 @@ class DiscoveryChainNode(ChainNode):
 # the same shape as psynet-adapter.js's buildAnswer(), so the rest of the
 # pipeline (aggregation, export) cannot tell bots and humans apart.
 def scripted_game_answer(definition: Dict[str, Any], participant_id: int | None = None) -> Dict[str, Any]:
-    """Deterministic bot answer matching the browser answer schema."""
+    """Bot answer matching the browser answer schema, reproducible per participant."""
     config = definition["game_config"]
     condition = definition["condition"]
     position = deepcopy(config["player_start"])
@@ -468,27 +468,36 @@ def scripted_game_answer(definition: Dict[str, Any], participant_id: int | None 
         while position["y"] > y:
             move(0, -1, "moveUp")
 
-    def successful_pair_names():
-        base_names = [
-            name for name, item in items.items()
-            if item.get("on_grid", True) and item["item_level"] == 0
-        ]
-        for held in base_names:
-            for target in base_names:
-                if held != target and transition_succeeds(condition, held, target):
-                    return held, target
-        return base_names[:2]
+    # A simple, not-smart player: random pick-ups, random fusion attempts and
+    # harvests, until the action budget or the board runs out.
+    rng = random.Random(f"bot:{participant_id}:{definition['generation_index']}")
 
-    for _ in range(2):
-        held_name, target_name = successful_pair_names()
-        held_item = items[held_name]
-        target_item = items[target_name]
-        move_to(held_item["x"], held_item["y"])
-        space()
-        move_to(target_item["x"], target_item["y"])
-        space()
-        if carrying:
-            space()
+    def on_grid_names() -> List[str]:
+        return [name for name, item in items.items() if item.get("on_grid", True)]
+
+    def empty_cell() -> tuple:
+        taken = {(item["x"], item["y"]) for item in items.values() if item.get("on_grid", True)}
+        while True:
+            cell = (rng.randrange(config["grid_size"]), rng.randrange(config["grid_size"]))
+            if cell not in taken:
+                return cell
+
+    while actions_left > 0:
+        names = on_grid_names()
+        if not carrying:
+            if not names:
+                break
+            target = items[rng.choice(names)]
+            move_to(target["x"], target["y"])
+            space()  # pick up
+        elif names and rng.random() < 0.7:
+            target = items[rng.choice(names)]
+            move_to(target["x"], target["y"])
+            space()  # fusion attempt
+        else:
+            x, y = empty_cell()
+            move_to(x, y)
+            space()  # harvest
 
     generation = definition["generation_index"]
     incoming = definition["incoming_message_set"]
@@ -515,12 +524,16 @@ def scripted_game_answer(definition: Dict[str, Any], participant_id: int | None 
             }
         )
 
-    message_how = sanitize_text(
-        f"Player {participant_id or 'bot'} scored {points} points by fusing same-shape crystals and harvesting the fused result."
-    )
-    message_rules = sanitize_text(
-        "For this planet, crystals with the same shape fused reliably in my run; harvest the higher-level crystal after each successful fusion."
-    )
+    sentences = [
+        "I tried fusing lots of different pairs of crystals.",
+        "Some pairs fused and some did not.",
+        "Harvest a crystal right after a fusion works.",
+        "Shape seemed to matter more than texture.",
+        "I am not sure what the rule is.",
+        "Once a pair works, look for the same pair again.",
+    ]
+    message_how = sanitize_text(" ".join(rng.sample(sentences, rng.randint(1, 3))))
+    message_rules = sanitize_text(" ".join(rng.sample(sentences, rng.randint(1, 3))))
     return {
         "chain_id": definition["chain_id"],
         "condition": definition["condition"],
@@ -700,7 +713,7 @@ CONSENT_HTML = """
   <b>Project title:</b> Learning and Reasoning in Interactions<br>
   <b>Principal investigator:</b> Dr. Bonan Zhao<br>
   <b>Researcher collecting data:</b> Zhangyekun Li<br>
-  <b>Funder (if applicable):</b> [FUNDER]
+  <b>Funder (if applicable):</b> School of Informatics, University of Edinburgh<br>
 </p>
 <p>
   This study was certified according to the Informatics Research Ethics Process,
@@ -852,24 +865,33 @@ class Exp(psynet.experiment.Experiment):
  
     # Run after the bots finish: checks that every chain grew correctly and that
     # every generation after 0 received the previous generation's messages.
+    # Run after the bots finish: checks that every chain grew correctly and that
+    # every generation after 0 received the previous generation's messages.
     def test_check_bots(self, bots: List[Bot]):
         # Give chain growth a short moment after the last finalized trial.
         time.sleep(1.0)
         trials = [trial for bot in bots for trial in bot.alive_trials]
         assert len(trials) == self.test_n_bots
         assert all(trial.finalized for trial in trials)
-        by_generation: Dict[int, List[ChainTrial]] = {}
+        # Check each chain separately: chain ids restart at 0 in every condition.
+        n_per_generation = ACTIVE_CONFIG["participants_per_generation"]
+        n_messages = min(ACTIVE_CONFIG["message_sample_size"], n_per_generation)
+        chains: Dict[tuple, Dict[int, List[ChainTrial]]] = {}
         for trial in trials:
-            by_generation.setdefault(trial.answer["generation_index"], []).append(trial)
-        assert sorted(by_generation) == [0, 1, 2]
-        assert all(len(items) == ACTIVE_CONFIG["participants_per_generation"] for items in by_generation.values())
-        gen1 = by_generation[1][0].answer["incoming_message_set"]
-        gen2 = by_generation[2][0].answer["incoming_message_set"]
-        assert gen1["source_generation_index"] == 0
-        assert gen2["source_generation_index"] == 1
-        assert len(gen1["messages"]) == ACTIVE_CONFIG["participants_per_generation"]
-        assert len(gen2["messages"]) == ACTIVE_CONFIG["participants_per_generation"]
+            key = (trial.answer["condition"], trial.answer["chain_id"])
+            chains.setdefault(key, {}).setdefault(trial.answer["generation_index"], []).append(trial)
+        assert len(chains) == ACTIVE_CONFIG["chains"] * len(ACTIVE_CONFIG["conditions"])
+        for by_generation in chains.values():
+            assert sorted(by_generation) == list(range(ACTIVE_CONFIG["generations"]))
+            for generation, items in by_generation.items():
+                assert len(items) == n_per_generation
+                incoming = items[0].answer["incoming_message_set"]
+                if generation == 0:
+                    assert incoming["messages"] == []
+                else:
+                    assert incoming["source_generation_index"] == generation - 1
+                    assert len(incoming["messages"]) == n_messages
         nodes = DiscoveryChainNode.query.all()
         aggregation_nodes = [node for node in nodes if node.var.get("aggregation", None)]
-        assert len(aggregation_nodes) >= 2
+        assert len(aggregation_nodes) >= len(chains) * (ACTIVE_CONFIG["generations"] - 1)
         super().test_check_bots(bots)
