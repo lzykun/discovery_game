@@ -14,6 +14,7 @@ import json
 import math
 import random
 import re
+import os
 import time
 from copy import deepcopy
 from typing import Any, Dict, Iterable, List
@@ -64,6 +65,20 @@ RUN_CONFIGS: Dict[str, Dict[str, Any]] = {
         "allow_regeneration": True,
         "regeneration_delay_ms": 400,
     },
+    "solo": {
+        "mode": "solo",
+        "chains": 1,
+        "conditions": ["easy"],
+        "generations": 3,
+        "participants_per_generation": 1,
+        "message_sample_size": 10,
+        "aggregation_rule": "log_points_weighted_ranked_sample",
+        "random_seed": 4242,
+        "grid_size": 15,
+        "action_budget": 40,
+        "allow_regeneration": True,
+        "regeneration_delay_ms": 400,
+    },
     "full": {
         "mode": "full",
         "chains": 20,
@@ -80,8 +95,8 @@ RUN_CONFIGS: Dict[str, Dict[str, Any]] = {
     },
 }
 
-# Switch between "compact" and "full" here.
-ACTIVE_CONFIG_NAME = "compact"
+# Switch between configs from the command line.
+ACTIVE_CONFIG_NAME = os.environ.get("DISCOVERY_CONFIG", "compact")
 ACTIVE_CONFIG = RUN_CONFIGS[ACTIVE_CONFIG_NAME]
 
 # ---------------------------------------------------------------------------
