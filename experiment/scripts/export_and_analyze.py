@@ -159,6 +159,7 @@ def subject_rows(trials: list[dict[str, str]], answers: list[dict[str, Any]]) ->
         messages = answer.get("messages", {}) or {}
         outgoing = messages.get("outgoing", {}) or {}
         timing = answer.get("timing", {}) or {}
+        survey = answer.get("survey", {}) or {}
         rows.append({
             "id": row.get("participant_id") or answer.get("participant_id_hint") or row.get("id"),
             "trial_id": row.get("id"),
@@ -173,6 +174,11 @@ def subject_rows(trials: list[dict[str, str]], answers: list[dict[str, Any]]) ->
             "time_complete": row.get("time_of_death") or row.get("creation_time"),
             "children_id": json_cell(sorted(children.get(int(row.get("id") or 0), []))),
             "layout_seed": ((answer.get("game_config", {}) or {}).get("layout_seed")),
+            "age": survey.get("age"),
+            "sex": survey.get("sex"),
+            "engagement": survey.get("engagement"),
+            "difficulty": survey.get("difficulty"),
+            "feedback": clean_text(survey.get("feedback")),
         })
     return rows
 

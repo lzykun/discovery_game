@@ -23,7 +23,6 @@ from markupsafe import Markup
 from psynet.bot import Bot
 from psynet.consent import Consent
 from psynet.modular_page import ModularPage, PushButtonControl
-from psynet.demography.general import ExperimentFeedback
 from psynet.page import InfoPage
 from psynet.timeline import Page, Timeline
 from psynet.trial.chain import ChainNode, ChainTrial, ChainTrialMaker
@@ -570,6 +569,13 @@ def scripted_game_answer(definition: Dict[str, Any], participant_id: int | None 
             "game_ms": 3000,
             "composition_ms": 900,
         },
+        "survey": {
+            "age": str(rng.randint(18, 70)),
+            "sex": rng.choice(["female", "male", "other", "noresponse"]),
+            "engagement": str(rng.randint(0, 10)),
+            "difficulty": str(rng.randint(0, 10)),
+            "feedback": "No comments.",
+        },
         "source": "psynet_bot_script",
     }
 
@@ -851,7 +857,6 @@ class Exp(psynet.experiment.Experiment):
             time_estimate=5,
         ),
         trial_maker,
-        ExperimentFeedback(),
     )
     # How many bots `psynet test local` sends: exactly enough to fill every chain.
     test_n_bots = (

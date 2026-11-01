@@ -65,6 +65,19 @@
     };
   }
 
+  // Debrief survey
+  function surveyData() {
+    const form = document.getElementById('postquiz');
+    if (!form) return {};
+    return {
+      age: form.elements.age.value,
+      sex: form.elements.sex.value,
+      engagement: form.elements.engagement.value,
+      difficulty: form.elements.difficulty.value,
+      feedback: sanitizeForPsyNet(form.elements.feedback.value),
+    };
+  }
+
   function buildAnswer() {
     const notes = currentNotesData();
     const outgoing = {
@@ -98,6 +111,7 @@
         outgoing,
       },
       timing: timingData(),
+      survey: surveyData(),
       source: 'upstream_discovery_chains_with_psynet_adapter',
     };
   }
@@ -123,6 +137,10 @@
       const messageDoneTime = new Date();
       subjectData.composition_duration = messageDoneTime - task_end_time;
     }
+    hideAndShowNext('task', 'debrief', 'block');
+  };
+
+  window.is_done = function () {
     psynet.nextPage(buildAnswer());
   };
 
