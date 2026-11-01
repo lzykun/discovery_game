@@ -9,6 +9,7 @@ currency = $
 wage_per_hour = 12.0
 base_payment = 0.00
 show_reward = false
+show_progress_bar = false
 
 [Prolific]
 auto_recruit = false

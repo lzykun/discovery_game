@@ -246,6 +246,17 @@
     }
   }
 
+  // Space and the arrow keys are game keys. Without this, the browser also
+  // uses them to scroll the page, which jumps whenever the page is taller
+  // than the window. Typing in the message boxes is left alone.
+  document.addEventListener('keydown', function (event) {
+    const gameKeys = [' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+    const typing = event.target.closest && event.target.closest('textarea, input, select');
+    if (gameKeys.includes(event.key) && !typing) {
+      event.preventDefault();
+    }
+  });
+
   if (typeof handleSpacePress === 'function') {
     const upstreamHandleSpacePress = handleSpacePress;
     // Do not count actions here: updateAction() already does, and counting

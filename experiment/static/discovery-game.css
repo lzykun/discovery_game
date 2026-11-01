@@ -66,8 +66,23 @@
   font-size: 15px;
 }
 
+/* Fixed-height status lines: a crystal icon appearing or disappearing in
+   "Currently Carrying", "At this Location" or "Hint" must not move the board. */
 #task-info p {
-  line-height: 1.05;
+  height: 30px;
+  line-height: 30px;
+  white-space: nowrap;
+}
+
+/* The template's blank line between the points and the key help. */
+#task-info br {
+  display: none;
+}
+
+#task-info p img {
+  width: 26px !important;
+  height: 26px !important;
+  vertical-align: middle;
 }
 
 #task-info > p:first-child {
