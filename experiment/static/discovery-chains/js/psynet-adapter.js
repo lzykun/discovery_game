@@ -60,7 +60,11 @@
       instruction_ms: subject.instruction_duration || 0,
       messages_browse_ms: subject.messages_browse_duration || 0,
       messages_reflect_ms: subject.messages_reflect_duration || 0,
-      game_ms: subject.task_duration || 0,
+      // Generation 0 (task-base.js) sets task_duration only inside Bonan's is_done,
+      // which our is_done replaces, so compute it here the same way she does:
+      // from page load (start_task_time) to Done.
+      game_ms: subject.task_duration ||
+        (typeof start_task_time !== 'undefined' ? new Date() - start_task_time : 0),
       composition_ms: subject.composition_duration || 0,
     };
   }
