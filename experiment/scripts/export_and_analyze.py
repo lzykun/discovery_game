@@ -179,6 +179,15 @@ def subject_rows(trials: list[dict[str, str]], answers: list[dict[str, Any]]) ->
             "engagement": survey.get("engagement"),
             "difficulty": survey.get("difficulty"),
             "feedback": clean_text(survey.get("feedback")),
+            # PsyNet marks a trial failed when, e.g., the player timed out.
+            "failed": row.get("failed"),
+            "failed_reason": row.get("failed_reason"),
+            "instruction_ms": timing.get("instruction_ms"),
+            "messages_browse_ms": timing.get("messages_browse_ms"),
+            "messages_reflect_ms": timing.get("messages_reflect_ms"),
+            "game_ms": timing.get("game_ms"),
+            "composition_ms": timing.get("composition_ms"),
+            "strategy_summary": clean_text(messages.get("strategy_summary")),
         })
     return rows
 
@@ -253,6 +262,34 @@ def notebook_rows(answers: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return rows
 
 
+def message_read_rows(answers: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """One row per incoming message opened (like Bonan's msgs_read.csv)."""
+    rows = []
+    for answer in answers:
+        messages = answer.get("messages", {}) or {}
+        incoming = {
+            msg.get("sample_id"): msg
+            for msg in (answer.get("incoming_message_set", {}) or {}).get("messages", [])
+        }
+        saved = {entry.get("sampleId") for entry in messages.get("notebook", []) or []}
+        for index, event in enumerate(messages.get("read_events", []) or [], start=1):
+            msg = incoming.get(event.get("sampleId"), {})
+            rows.append({
+                "id": answer.get("participant_id_hint"),
+                "condition": answer.get("condition"),
+                "chain_id": answer.get("chain_id"),
+                "generation_id": answer.get("generation_index"),
+                "sequence_id": index,
+                "message_id": event.get("sampleId"),
+                "source_trial_id": msg.get("source_trial_id"),
+                "time_open": event.get("openedAt"),
+                "time_close": event.get("closedAt"),
+                "dwell_ms": event.get("dwellMs"),
+                "saved_to_notebook": event.get("sampleId") in saved,
+            })
+    return rows
+
+
 def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fieldnames = sorted({key for row in rows for key in row.keys()})
@@ -273,11 +310,13 @@ def analyze_export(export_path: Path, output_dir: Path) -> dict[str, Path]:
             "action_data": output_dir / "action_data.csv",
             "event_data": output_dir / "event_data.csv",
             "notebook_data": output_dir / "notebook_data.csv",
+            "message_read_data": output_dir / "message_read_data.csv",
         }
         write_csv(outputs["subject_data"], subject_rows(trials, answers))
         write_csv(outputs["action_data"], action_rows(answers))
         write_csv(outputs["event_data"], event_rows(answers))
         write_csv(outputs["notebook_data"], notebook_rows(answers))
+        write_csv(outputs["message_read_data"], message_read_rows(answers))
     return outputs
 
 
