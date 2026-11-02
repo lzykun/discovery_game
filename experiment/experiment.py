@@ -27,6 +27,9 @@ from psynet.modular_page import ModularPage, PushButtonControl
 from psynet.page import InfoPage
 from psynet.timeline import Page, Timeline
 from psynet.trial.chain import ChainNode, ChainTrial, ChainTrialMaker
+from psynet.utils import get_logger
+
+logger = get_logger()
 
 # ---------------------------------------------------------------------------
 # Settings
@@ -698,10 +701,54 @@ def get_start_nodes() -> List[DiscoveryChainNode]:
     return nodes
 
 
+class DiscoveryTrialMaker(ChainTrialMaker):
+    """ChainTrialMaker with recruitment paced by the places open right now."""
+
+    # How long (seconds) a participant may wait for a free place before PsyNet
+    # ends their session. PsyNet's default is 60.
+    max_time_waiting_for_trial = 300
+
+    def open_places_criterion(self, experiment):
+        # Called by PsyNet each time a participant finishes (needs auto_recruit = true).
+        # Returns True (add one Prolific place) only if a newcomer would find a place.
+        from psynet.participant import Participant
+
+        growing = {n.id for n in self.ready_to_grow_network_query().all()}
+        open_places = 0
+        for network in self.network_query.filter_by(full=False, failed=False).all():
+            head = network.head
+            if head is None:
+                continue
+            if network.id in growing:
+                # This generation is done; the next one opens within seconds,
+                # unless this was the last generation.
+                if head.degree + 1 < network.max_size:
+                    open_places += self.trials_per_node
+            else:
+                open_places += max(0, self.trials_per_node - head.n_viable_trials)
+
+        # Working participants who have not got a game yet (consent, info, waiting).
+        playing = {t.participant_id for t in self.trial_class.query.filter_by(trial_maker_id=self.id)}
+        not_yet_placed = [
+            p for p in Participant.query.filter_by(status="working", failed=False).all()
+            if p.id not in playing
+        ]
+        logger.info(
+            "open_places_criterion: %i open places, %i participants not yet placed.",
+            open_places, len(not_yet_placed),
+        )
+        return open_places > len(not_yet_placed)
+
+    recruit_criteria = {
+        **ChainTrialMaker.recruit_criteria,
+        "open_places": open_places_criterion,
+    }
+
+
 # Tells PsyNet how to run the chains: which classes to use, how many chains,
 # generations and players per generation, and that each player plays once
 # ("across" = each generation is played by new participants).
-trial_maker = ChainTrialMaker(
+trial_maker = DiscoveryTrialMaker(
     id_="discovery_chain",
     trial_class=DiscoveryTrial,
     node_class=DiscoveryChainNode,
@@ -716,7 +763,7 @@ trial_maker = ChainTrialMaker(
     balance_across_chains=True,
     check_performance_at_end=False,
     check_performance_every_trial=False,
-    recruit_mode="n_trials",
+    recruit_mode="open_places",
     target_n_participants=None,
     wait_for_networks=True,
     fail_trials_on_premature_exit=False,

@@ -12,4 +12,4 @@ show_reward = false
 show_progress_bar = false
 
 [Prolific]
-auto_recruit = false
+auto_recruit = true
